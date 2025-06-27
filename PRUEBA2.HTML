@@ -2,29 +2,33 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Inventario en Tiempo Real</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <title>Dashboard de Inventario</title>
+  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.6.0/tabletop.min.js"></script>
   <style>
     body {
       background-color: #1e1e1e;
       color: #f0f0f0;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #00ffff;
+      text-align: center;
+      margin-bottom: 2rem;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      background-color: #2a2a2a;
-      border-radius: 10px;
+      background-color: #2c2c2c;
+      border-radius: 8px;
       overflow: hidden;
     }
 
     th, td {
-      padding: 10px;
+      padding: 12px 16px;
       border-bottom: 1px solid #444;
       text-align: left;
     }
@@ -32,93 +36,61 @@
     th {
       background-color: #333;
       color: #00ffff;
+      font-weight: bold;
     }
 
     tr:hover {
       background-color: #383838;
     }
 
-    .bajo-stock {
+    .stock-bajo {
       background-color: rgba(255, 0, 0, 0.3);
     }
 
-    canvas {
-      margin-top: 40px;
-    }
-
-    h1 {
+    footer {
       text-align: center;
-      color: #00ffff;
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #666;
     }
   </style>
 </head>
 <body>
 
-<h1>Dashboard de Inventario</h1>
-<div id="tabla"></div>
-<canvas id="grafico" height="150"></canvas>
+<h1>Visualizador de Inventario</h1>
+<table id="tabla"></table>
+
+<footer>
+  Datos cargados automáticamente desde Google Sheets
+</footer>
 
 <script>
-const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=csv";
+  window.onload = function() {
+    Tabletop.init({
+      key: '1hjCh-IUibb-SYtAMZDKx4gsjIgLPMMByEm9VWCxqqCA',
+      simpleSheet: true,
+      callback: function(data) {
+        const tabla = document.getElementById("tabla");
+        const headers = ["PRODUCTOS", "INVENTARIO INICIAL", "TOTAL POR ACTIVIDADES", "TOTAL DISPONIBLE"];
+        let html = "<thead><tr>";
+        headers.forEach(h => html += `<th>${h}</th>`);
+        html += "</tr></thead><tbody>";
 
-fetch(url)
-  .then(response => response.text())
-  .then(csv => {
-    const data = Papa.parse(csv, { header: true }).data;
-    renderTable(data);
-    renderChart(data);
-  });
+        data.forEach(row => {
+          const total = parseFloat(row["TOTAL DISPONIBLE"]) || 0;
+          const rowClass = total < 10 ? "stock-bajo" : "";
+          html += `<tr class="${rowClass}">`;
+          headers.forEach(h => html += `<td>${row[h]}</td>`);
+          html += "</tr>";
+        });
 
-function renderTable(data) {
-  let html = `<table><thead><tr>`;
-  const headers = Object.keys(data[0]);
-  headers.forEach(h => {
-    html += `<th>${h}</th>`;
-  });
-  html += `</tr></thead><tbody>`;
-
-  data.forEach(row => {
-    const saldo = parseFloat(row["Existencias reales"] || row[headers[3]] || 0);
-    const rowClass = saldo < 10 ? 'bajo-stock' : '';
-    html += `<tr class="${rowClass}">`;
-    headers.forEach(h => {
-      html += `<td>${row[h]}</td>`;
-    });
-    html += `</tr>`;
-  });
-
-  html += `</tbody></table>`;
-  document.getElementById('tabla').innerHTML = html;
-}
-
-function renderChart(data) {
-  const productos = data.map(r => r["Producto"] || r[Object.keys(r)[0]]);
-  const existencias = data.map(r => parseFloat(r["Existencias reales"] || r[Object.keys(r)[3]] || 0));
-
-  const ctx = document.getElementById('grafico').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: productos,
-      datasets: [{
-        label: 'Existencias Reales',
-        data: existencias,
-        backgroundColor: 'rgba(0, 255, 255, 0.5)',
-        borderColor: 'cyan',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+        html += "</tbody>";
+        tabla.innerHTML = html;
       }
-    }
-  });
-}
+    });
+  };
 </script>
 
 </body>
 </html>
+
