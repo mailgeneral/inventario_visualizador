@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventario en Tiempo Real</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #2a2a2a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+      text-align: left;
+    }
+
+    th {
+      background-color: #333;
+      color: #00ffff;
+    }
+
+    tr:hover {
+      background-color: #383838;
+    }
+
+    .bajo-stock {
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+
+    canvas {
+      margin-top: 40px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ffff;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Dashboard de Inventario</h1>
+<div id="tabla"></div>
+<canvas id="grafico" height="150"></canvas>
+
+<script>
+const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=csv";
+
+fetch(url)
+  .then(response => response.text())
+  .then(csv => {
+    const data = Papa.parse(csv, { header: true }).data;
+    renderTable(data);
+    renderChart(data);
+  });
+
+function renderTable(data) {
+  let html = `<table><thead><tr>`;
+  const headers = Object.keys(data[0]);
+  headers.forEach(h => {
+    html += `<th>${h}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+
+  data.forEach(row => {
+    const saldo = parseFloat(row["Existencias reales"] || row[headers[3]] || 0);
+    const rowClass = saldo < 10 ? 'bajo-stock' : '';
+    html += `<tr class="${rowClass}">`;
+    headers.forEach(h => {
+      html += `<td>${row[h]}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>`;
+  document.getElementById('tabla').innerHTML = html;
+}
+
+function renderChart(data) {
+  const productos = data.map(r => r["Producto"] || r[Object.keys(r)[0]]);
+  const existencias = data.map(r => parseFloat(r["Existencias reales"] || r[Object.keys(r)[3]] || 0));
+
+  const ctx = document.getElementById('grafico').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: productos,
+      datasets: [{
+        label: 'Existencias Reales',
+        data: existencias,
+        backgroundColor: 'rgba(0, 255, 255, 0.5)',
+        borderColor: 'cyan',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>
