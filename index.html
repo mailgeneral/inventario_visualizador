@@ -1,3 +1,4 @@
+<!-- Código corregido con barras en rojo -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -145,6 +146,10 @@
       const country = data.country_name || '';
       const org = data.org || 'proveedor desconocido';
       document.getElementById('vigilancia').innerHTML = `📍 Acceso registrado desde <strong>${ip}</strong> (${city}, ${region}, ${country})<br><span style="color:#aaa;">Auditoría (${org})</span>`;
+    })
+    .catch(() => {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('vigilancia').innerText = '📍 Acceso registrado. Sistema de auditoría activo.';
     });
 
   const minimosPersonalizados = {
@@ -175,10 +180,12 @@
 
         labels.push(producto);
         data.push(total);
-        colors.push('#10B981');
 
         if (minimosPersonalizados[producto] !== undefined && total < minimosPersonalizados[producto]) {
           alertas.push(`⚠ <strong>${producto}</strong> → POR DEBAJO DEL MÍNIMO!!! REPONER!!!`);
+          colors.push('#B91C1C'); // rojo
+        } else {
+          colors.push('#10B981'); // verde
         }
       });
 
@@ -219,4 +226,3 @@
 
 </body>
 </html>
-
