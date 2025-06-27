@@ -1,52 +1,222 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Visualizador de Google Sheets</title>
-<style>
-  body {
-    margin: 0;
-    padding: 10px;
-    background: #121212;
-    color: #eee;
-    font-family: Arial, sans-serif;
-  }
-  iframe {
-    border: none;
-    width: 100%;
-    height: 80vh; /* altura decente para ver */
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-    border-radius: 6px;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 15px;
-    font-weight: normal;
-    color: #00ffff;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Inventario</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f4f4f4;
+      --text: #111;
+      --box: #fff;
+      --box-shadow: rgba(0,0,0,0.2);
+    }
+    body.dark-mode {
+      --bg: #1f2937;
+      --text: #f4f4f4;
+      --box: #374151;
+      --box-shadow: rgba(255,255,255,0.1);
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s;
+    }
+    header {
+      background-color: #111827;
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin: 0;
+    }
+    h3 {
+      font-weight: normal;
+      color: #d1d5db;
+    }
+    .container {
+      max-width: 960px;
+      margin: 40px auto;
+      background: var(--box);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 0px 20px var(--box-shadow);
+    }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 8px;
+    }
+    .botones {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .whatsapp-btn, .pdf-btn, .modo-btn {
+      background-color: #2563eb;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1em;
+      margin: 10px;
+      display: inline-block;
+      transition: background-color 0.3s;
+    }
+    .whatsapp-btn:hover, .pdf-btn:hover, .modo-btn:hover {
+      background-color: #1e40af;
+    }
+    .vigilancia {
+      text-align: center;
+      font-size: 0.9em;
+      color: #999;
+      margin-top: 50px;
+    }
+    .loading {
+      text-align: center;
+      font-size: 0.9em;
+      color: #999;
+      margin-bottom: 20px;
+    }
+    .chart-container {
+      margin-top: 50px;
+    }
+    .alertas {
+      margin-top: 30px;
+      font-weight: bold;
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    canvas {
+      width: 100% !important;
+      max-width: 800px;
+      margin: 0 auto;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Visualizador Google Sheets</h1>
+<header>
+  <h1>SISTEMA DE INVENTARIO DINÁMICO</h1>
+  <h3>Datos actualizados en tiempo real – Acceso restringido</h3>
+</header>
 
-<iframe 
-  id="gsheet" 
-  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pubhtml?widget=true&amp;headers=false" 
-  allowfullscreen>
-</iframe>
+<div class="container">
+  <div class="loading" id="loading">
+    Analizando conexión... ⏳
+  </div>
+
+  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pubhtml?widget=true&amp;headers=false"></iframe>
+
+  <div class="chart-container">
+    <h3 style="text-align:center; margin-bottom: 20px;">Resumen Visual del Inventario</h3>
+    <canvas id="inventarioChart"></canvas>
+    <div id="alertasMinimos" class="alertas"></div>
+  </div>
+
+  <div class="botones">
+    <a class="whatsapp-btn" href="https://wa.me/52XXXXXXXXXX?text=Hola,%20quiero%20consultar%20el%20inventario" target="_blank">📞 WhatsApp</a>
+    <a class="pdf-btn" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=pdf" target="_blank">🔖 Descargar PDF</a>
+    <button class="modo-btn" onclick="alternarModo()">⚫​Modo Oscuro⚫​</button>
+  </div>
+
+  <div class="vigilancia" id="vigilancia"></div>
+</div>
 
 <script>
-  // Si quieres hacer algún ajuste dinámico en futuro, aquí puedes poner JS.
-  // Por ejemplo, que el iframe cambie de alto según tamaño de pantalla:
-  function ajustarAltura() {
-    const iframe = document.getElementById('gsheet');
-    iframe.style.height = (window.innerHeight * 0.8) + 'px';
+  fetch('https://ipapi.co/json/')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('loading').style.display = 'none';
+      const ip = data.ip;
+      const city = data.city || '';
+      const region = data.region || '';
+      const country = data.country_name || '';
+      const org = data.org || 'proveedor desconocido';
+      document.getElementById('vigilancia').innerHTML = `📍 Acceso registrado desde <strong>${ip}</strong> (${city}, ${region}, ${country})<br><span style="color:#aaa;">Auditoría (${org})</span>`;
+    });
+
+  const minimosPersonalizados = {
+    "IMPERMEABILIZANTE TERRACOTA 5A 19 L": 50,
+    "IMPERMEABILIZANTE BLANCO 5A 19 L": 30,
+    "PINTURA BLANCA INTERIOR LIDERPINT 19 L": 10,
+    "PINTURA BLANCA EXTERIOR OLYMPUS": 5,
+    "RESANADOR 1 L TERRACOTA": 20,
+    "RESANADOR 1 L BLANCO": 10,
+    "SELLADOR 1 L": 20,
+  };
+
+  const url = 'https://corsproxy.io/?https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=csv';
+
+  fetch(url)
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.trim().split('\n').slice(1);
+      const labels = [];
+      const data = [];
+      const colors = [];
+      const alertas = [];
+
+      rows.forEach(row => {
+        const cols = row.split(',');
+        const producto = cols[0].replace(/"/g, '').trim();
+        const total = parseFloat(cols[3]);
+
+        labels.push(producto);
+        data.push(total);
+        colors.push('#10B981');
+
+        if (minimosPersonalizados[producto] !== undefined && total < minimosPersonalizados[producto]) {
+          alertas.push(`⚠ <strong>${producto}</strong> → POR DEBAJO DEL MÍNIMO!!! REPONER!!!`);
+        }
+      });
+
+      const ctx = document.getElementById('inventarioChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Stock Disponible',
+            data: data,
+            backgroundColor: colors
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Inventario Real por Producto'
+            }
+          }
+        }
+      });
+
+      if (alertas.length > 0) {
+        document.getElementById("alertasMinimos").innerHTML = alertas.join("<br>");
+      } else {
+        document.getElementById("alertasMinimos").style.display = "none";
+      }
+    });
+
+  function alternarModo() {
+    document.body.classList.toggle('dark-mode');
   }
-  window.addEventListener('resize', ajustarAltura);
-  ajustarAltura();
 </script>
 
 </body>
 </html>
+
