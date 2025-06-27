@@ -1,10 +1,9 @@
-<!-- Código corregido con barras en rojo -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="robots" content="noindex, nofollow">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Panel de Inventario</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -21,34 +20,27 @@
       --box-shadow: rgba(255,255,255,0.1);
     }
     body {
-      background-color: var(--bg);
+      background: var(--bg);
       color: var(--text);
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       transition: all 0.3s;
     }
     header {
-      background-color: #111827;
+      background: #111827;
       color: white;
       text-align: center;
       padding: 30px 20px;
     }
-    h1 {
-      font-size: 2em;
-      margin: 0;
-    }
-    h3 {
-      font-weight: normal;
-      color: #d1d5db;
-    }
+    h1 { font-size: 2em; margin: 0; }
+    h3 { font-weight: normal; color: #d1d5db; }
     .container {
       max-width: 960px;
       margin: 40px auto;
       background: var(--box);
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0px 0px 20px var(--box-shadow);
+      box-shadow: 0 0 20px var(--box-shadow);
     }
     iframe {
       width: 100%;
@@ -60,8 +52,8 @@
       text-align: center;
       margin-top: 30px;
     }
-    .whatsapp-btn, .pdf-btn, .modo-btn {
-      background-color: #2563eb;
+    .whatsapp-btn, .pdf-btn, .xlsx-btn, .modo-btn {
+      background: #2563eb;
       color: white;
       padding: 12px 25px;
       border-radius: 10px;
@@ -71,9 +63,11 @@
       margin: 10px;
       display: inline-block;
       transition: background-color 0.3s;
+      cursor: pointer;
+      border: none;
     }
-    .whatsapp-btn:hover, .pdf-btn:hover, .modo-btn:hover {
-      background-color: #1e40af;
+    .whatsapp-btn:hover, .pdf-btn:hover, .xlsx-btn:hover, .modo-btn:hover {
+      background: #1e40af;
     }
     .vigilancia {
       text-align: center;
@@ -104,6 +98,59 @@
       margin: 0 auto;
       display: block;
     }
+    /* Slider Noticias */
+    #noticiasContainer {
+      max-width: 960px;
+      margin: 40px auto 20px;
+      background: var(--box);
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px var(--box-shadow);
+    }
+    #newsList {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      gap: 15px;
+      padding: 10px 0;
+    }
+    .noticia {
+      min-width: 280px;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+      color: var(--text);
+      font-size: 0.9em;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .noticia a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 10px;
+      align-self: flex-start;
+    }
+    #sliderBtns {
+      text-align: center;
+      margin-top: 10px;
+    }
+    #sliderBtns button {
+      background: #2563eb;
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      margin: 0 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #sliderBtns button:hover {
+      background: #1e40af;
+    }
   </style>
 </head>
 <body>
@@ -114,9 +161,7 @@
 </header>
 
 <div class="container">
-  <div class="loading" id="loading">
-    Analizando conexión... ⏳
-  </div>
+  <div class="loading" id="loading">Analizando conexión... ⏳</div>
 
   <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pubhtml?widget=true&amp;headers=false"></iframe>
 
@@ -129,22 +174,37 @@
   <div class="botones">
     <a class="whatsapp-btn" href="https://wa.me/5212228496995?text=Hola,%20quiero%20consultar%20el%20inventario" target="_blank">📞 WhatsApp</a>
     <a class="pdf-btn" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=pdf" target="_blank">🔖 Descargar PDF</a>
+    <a class="xlsx-btn" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=xlsx" target="_blank">📊 Descargar XLSX</a>
     <button class="modo-btn" onclick="alternarModo()">⚫​Modo Oscuro⚫​</button>
   </div>
+
+  <!-- Reproductor Spotify -->
+  <div style="text-align:center; margin-top:20px;">
+    <iframe src="https://open.spotify.com/embed/track/52WLog8aTizUeOacC31H6S" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+  </div>
+
+  <div class="vigilancia" id="vigilancia"></div>
 
   <div class="vigilancia" id="vigilancia"></div>
 </div>
 
+<!-- Contenedor Noticias -->
+<div id="noticiasContainer" class="container">
+  <h3 style="text-align:center;">Últimas Noticias de Puebla</h3>
+  <div id="newsList">Cargando noticias...</div>
+  <div id="sliderBtns">
+    <button id="prevBtn">⬅ Anterior</button>
+    <button id="nextBtn">Siguiente ➡</button>
+  </div>
+</div>
+
 <script>
+  // IP y auditoría
   fetch('https://ipapi.co/json/')
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
       document.getElementById('loading').style.display = 'none';
-      const ip = data.ip;
-      const city = data.city || '';
-      const region = data.region || '';
-      const country = data.country_name || '';
-      const org = data.org || 'proveedor desconocido';
+      const { ip, city = '', region = '', country_name: country = '', org = 'proveedor desconocido' } = data;
       document.getElementById('vigilancia').innerHTML = `📍 Acceso registrado desde <strong>${ip}</strong> (${city}, ${region}, ${country})<br><span style="color:#aaa;">Auditoría (${org})</span>`;
     })
     .catch(() => {
@@ -152,7 +212,8 @@
       document.getElementById('vigilancia').innerText = '📍 Acceso registrado. Sistema de auditoría activo.';
     });
 
-  const minimosPersonalizados = {
+  // Stock mínimos
+  const minimos = {
     "IMPERMEABILIZANTE TERRACOTA 5A 19 L": 50,
     "IMPERMEABILIZANTE BLANCO 5A 19 L": 30,
     "PINTURA BLANCA INTERIOR LIDERPINT 19 L": 10,
@@ -162,67 +223,95 @@
     "SELLADOR 1 L": 20,
   };
 
-  const url = 'https://corsproxy.io/?https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=csv';
+  // CSV url con proxy
+  const csvUrl = 'https://corsproxy.io/?https://docs.google.com/spreadsheets/d/e/2PACX-1vRhPyU7uxwMUl-K_B606TUUrIJHpeK80YgbpkupaLGfg-_8EUYbPm-7CyPwrF81U_ytPm8065viZgjP/pub?output=csv';
 
-  fetch(url)
-    .then(res => res.text())
+  fetch(csvUrl)
+    .then(r => r.text())
     .then(csv => {
       const rows = csv.trim().split('\n').slice(1);
-      const labels = [];
-      const data = [];
-      const colors = [];
-      const alertas = [];
+      const labels = [], data = [], colors = [], alertas = [];
 
       rows.forEach(row => {
         const cols = row.split(',');
-        const producto = cols[0].replace(/"/g, '').trim();
+        const prod = cols[0].replace(/"/g,'').trim();
         const total = parseFloat(cols[3]);
 
-        labels.push(producto);
+        labels.push(prod);
         data.push(total);
-
-        if (minimosPersonalizados[producto] !== undefined && total < minimosPersonalizados[producto]) {
-          alertas.push(`⚠ <strong>${producto}</strong> → POR DEBAJO DEL MÍNIMO!!! REPONER!!!`);
-          colors.push('#B91C1C'); // rojo
+        if (minimos[prod] !== undefined && total < minimos[prod]) {
+          alertas.push(`⚠ <strong>${prod}</strong> → POR DEBAJO DEL MÍNIMO!!! REPONER!!!`);
+          colors.push('#B91C1C');
         } else {
-          colors.push('#10B981'); // verde
+          colors.push('#10B981');
         }
       });
 
       const ctx = document.getElementById('inventarioChart').getContext('2d');
       new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Stock Disponible',
-            data: data,
-            backgroundColor: colors
-          }]
-        },
+        data: { labels, datasets: [{ label: 'Stock Disponible', data, backgroundColor: colors }] },
         options: {
           responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: {
-              display: true,
-              text: 'Inventario Real por Producto'
-            }
-          }
+          plugins: { legend: { display: false }, title: { display: true, text: 'Inventario Real por Producto' } }
         }
       });
 
-      if (alertas.length > 0) {
-        document.getElementById("alertasMinimos").innerHTML = alertas.join("<br>");
+      if(alertas.length) {
+        document.getElementById('alertasMinimos').innerHTML = alertas.join('<br>');
       } else {
-        document.getElementById("alertasMinimos").style.display = "none";
+        document.getElementById('alertasMinimos').style.display = 'none';
       }
     });
 
+  // Modo oscuro toggle
   function alternarModo() {
     document.body.classList.toggle('dark-mode');
   }
+
+  // Slider Noticias config
+  const RSS_PROXY = 'https://rss-noti.corporativoimperdellanta.workers.dev/';
+  const newsList = document.getElementById('newsList');
+  const scrollAmount = 300;
+
+  function crearNoticia(item) {
+    const title = item.querySelector('title')?.textContent || 'Sin título';
+    const link = item.querySelector('link')?.textContent || '#';
+    const pubDate = item.querySelector('pubDate')?.textContent || '';
+    const div = document.createElement('div');
+    div.className = 'noticia';
+    div.innerHTML = `<strong>${title}</strong><br><small>${pubDate}</small><br><a href="${link}" target="_blank" rel="noopener noreferrer">Leer más</a>`;
+    return div;
+  }
+
+  function cargarNoticias() {
+    fetch(RSS_PROXY)
+      .then(r => r.text())
+      .then(str => {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(str, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        newsList.innerHTML = '';
+        items.forEach(item => {
+          newsList.appendChild(crearNoticia(item));
+        });
+      })
+      .catch(() => {
+        newsList.innerHTML = '<p style="color:#b91c1c;">No se pudieron cargar las noticias. Intenta más tarde.</p>';
+      });
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    newsList.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    newsList.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  });
+
+  // carga noticias arranque
+  cargarNoticias();
 </script>
 
 </body>
 </html>
+
