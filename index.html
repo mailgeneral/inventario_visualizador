@@ -206,6 +206,21 @@
       document.getElementById('loading').style.display = 'none';
       const { ip, city = '', region = '', country_name: country = '', org = 'proveedor desconocido' } = data;
       document.getElementById('vigilancia').innerHTML = `📍 Acceso registrado desde <strong>${ip}</strong> (${city}, ${region}, ${country})<br><span style="color:#aaa;">Auditoría (${org})</span>`;
+      // 👁️ Envío al Worker de Cloudflare para registrar visita en Google Sheets
+fetch('https://regvisitas.corporativoimperdellanta.workers.dev/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    ip: ip,
+    city: city,
+    region: region,
+    country: country,
+    org: org,
+    url: window.location.href
+  })
+}).catch(err => {
+  console.error("Error enviando datos al Worker:", err);
+});
     })
     .catch(() => {
       document.getElementById('loading').style.display = 'none';
@@ -311,7 +326,5 @@
   // carga noticias arranque
   cargarNoticias();
 </script>
-
 </body>
 </html>
-
